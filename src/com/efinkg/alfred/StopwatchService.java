@@ -58,7 +58,7 @@ public class StopwatchService extends Service {
         if (mLiveCard == null) {
             Log.d(TAG, "Publishing LiveCard");
             mLiveCard = mTimelineManager.getLiveCard(LIVE_CARD_ID);
-
+           XMPPClient mCaffeine = new XMPPClient();
             // Keep track of the callback to remove it before unpublishing.
             mCallback = new ChronometerDrawer(this);
             mLiveCard.enableDirectRendering(true).getSurfaceHolder().addCallback(mCallback);
