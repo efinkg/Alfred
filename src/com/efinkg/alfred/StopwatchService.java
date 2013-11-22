@@ -36,7 +36,6 @@ public class StopwatchService extends Service {
     private static final String TAG = "StopwatchService";
     private static final String LIVE_CARD_ID = "coffeeMaker";
 
-    public Sender Message;
     
     private ChronometerDrawer mCallback;
 
@@ -61,7 +60,6 @@ public class StopwatchService extends Service {
             mLiveCard = mTimelineManager.getLiveCard(LIVE_CARD_ID);
 
             // Keep track of the callback to remove it before unpublishing.
-           Sender MessageSend;
             mCallback = new ChronometerDrawer(this);
             mLiveCard.enableDirectRendering(true).getSurfaceHolder().addCallback(mCallback);
             mLiveCard.setNonSilent(true);
