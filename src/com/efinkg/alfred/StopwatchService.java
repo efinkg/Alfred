@@ -29,63 +29,67 @@ import android.os.IBinder;
 import android.util.Log;
 
 /**
- * Service owning the LiveCard living in the timeline.
- */
+ * Service owning the LiveCard living in the timeline;
+ **/
+
 public class StopwatchService extends Service {
 
-    private static final String TAG = "StopwatchService";
-    private static final String LIVE_CARD_ID = "coffeeMaker";
+	private static final String TAG = "StopwatchService";
+	private static final String LIVE_CARD_ID = "coffeeMaker";
+	private ChronometerDrawer mCallback;
 
-    
-    private ChronometerDrawer mCallback;
+	private TimelineManager mTimelineManager;
+	private LiveCard mLiveCard;
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.i("Trying to send a message","No Luck Yet");
+		SendInstantMessageSample.runDemo();
+		Log.i("Trying to send a message","Yeah whut up");
+		mTimelineManager = TimelineManager.from(this);
+	}
 
-    private TimelineManager mTimelineManager;
-    private LiveCard mLiveCard;
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mTimelineManager = TimelineManager.from(this);
-    }
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (mLiveCard == null) {
+			Log.d(TAG, "Publishing LiveCard");
+			mLiveCard = mTimelineManager.getLiveCard(LIVE_CARD_ID);
+			// XMPPClient mCaffeine = new XMPPClient(); Deprecated
+			// Keep track of the callback to remove it before unpublishing.
+			mCallback = new ChronometerDrawer(this);
+			mLiveCard.enableDirectRendering(true).getSurfaceHolder()
+					.addCallback(mCallback);
+			mLiveCard.setNonSilent(true);
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+			Intent menuIntent = new Intent(this, MenuActivity.class);
+			mLiveCard.setAction(PendingIntent.getActivity(this, 0, menuIntent,
+					0));
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (mLiveCard == null) {
-            Log.d(TAG, "Publishing LiveCard");
-            mLiveCard = mTimelineManager.getLiveCard(LIVE_CARD_ID);
-           //XMPPClient mCaffeine = new XMPPClient(); Deprecated
-            // Keep track of the callback to remove it before unpublishing.
-            mCallback = new ChronometerDrawer(this);
-            mLiveCard.enableDirectRendering(true).getSurfaceHolder().addCallback(mCallback);
-            mLiveCard.setNonSilent(true);
+			mLiveCard.publish();
+			Log.d(TAG, "Done publishing LiveCard");
+		} else {
+			// TODO(alainv): Jump to the LiveCard when API is available.
+		}
 
-            Intent menuIntent = new Intent(this, MenuActivity.class);
-            mLiveCard.setAction(PendingIntent.getActivity(this, 0, menuIntent, 0));
+		return START_STICKY;
+	}
 
-            mLiveCard.publish();
-            Log.d(TAG, "Done publishing LiveCard");
-        } else {
-            // TODO(alainv): Jump to the LiveCard when API is available.
-        }
-
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        if (mLiveCard != null && mLiveCard.isPublished()) {
-            Log.d(TAG, "Unpublishing LiveCard");
-            if (mCallback != null) {
-                mLiveCard.getSurfaceHolder().removeCallback(mCallback);
-            }
-            mLiveCard.unpublish();
-            mLiveCard = null;
-        }
-        super.onDestroy();
-    }
+	@Override
+	public void onDestroy() {
+		if (mLiveCard != null && mLiveCard.isPublished()) {
+			Log.d(TAG, "Unpublishing LiveCard");
+			if (mCallback != null) {
+				mLiveCard.getSurfaceHolder().removeCallback(mCallback);
+			}
+			mLiveCard.unpublish();
+			mLiveCard = null;
+		}
+		super.onDestroy();
+	}
 }
