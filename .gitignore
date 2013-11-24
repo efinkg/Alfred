@@ -14,3 +14,11 @@
 *.jar
 
 *.jar
+
+.classpath
+
+bin/classes/com/efinkg/alfred/ChronometerDrawer$1.class
+
+*.class
+
+*.class
